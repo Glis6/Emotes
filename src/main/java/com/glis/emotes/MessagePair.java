@@ -1,9 +1,14 @@
 package com.glis.emotes;
 
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Glis
  */
-public interface MessagePair {
+public interface MessagePair extends ConfigurationSerializable {
     /**
      * @return The message that the executor will receive.
      */
@@ -23,4 +28,14 @@ public interface MessagePair {
      * @param message The message to set for the receiver.
      */
     void setReceiverMessage(String message);
+
+    /**
+     * {@inheritDoc}
+     */
+    default Map<String, Object> serialize() {
+        final Map<String, Object> result = new HashMap<>();
+        result.put("executor_message", getExecutorMessage());
+        result.put("receiver_message", getReceiverMessage());
+        return result;
+    }
 }

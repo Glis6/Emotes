@@ -1,68 +1,92 @@
 package com.glis.emotes;
 
-import lombok.Data;
-import org.bukkit.entity.Entity;
+import lombok.Getter;
+import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Represents a single emote. Emotes are defined in the config file.
  *
  * @author Glis
  */
-@Data
+@SerializableAs("Emote")
 public class Emote implements IEmote {
-    /**
-     * A {@link Map} of cooldowns. Mapped by the {@link Player#getUniqueId()}.
-     */
-    private final Map<String, Long> cooldowns = new HashMap<>();
-
-    /**
-     * The easter egg messages. When an emote is used on an entity that is in this list
-     * then it'll give a special different message.
-     */
-    private final Map<String, MessagePair> easterEggs;
 
     /**
      * The name of the emote.
      */
+    @Getter
     private final String emoteName;
 
     /**
      * The cooldown between each of the emotes.
      */
+    @Getter
     private final long cooldown;
-
-    /**
-     * The permissions required to do this emote.
-     */
-    private final Collection<Permission> requiredPermissions;
 
     /**
      * The message that the executor will receive upon doing the emote.
      * This message can be empty or null and will not be displayed in that case.
      */
+    @Getter
     private final String executorMessage;
 
     /**
      * The message that the receiving player will get.
      */
+    @Getter
     private final String receiverMessage;
+
+    /**
+     * The permissions required to do this emote.
+     */
+    @Getter
+    private final Collection<Permission> requiredPermissions;
+
+    /**
+     * The easter egg messages. When an emote is used on an entity that is in this list
+     * then it'll give a special different message.
+     */
+    @Getter
+    private final Map<String, MessagePair> easterEggs;
+
+    /**
+     * A {@link Map} of cooldowns. Mapped by the {@link Player#getUniqueId()}.
+     */
+    @Getter
+    @SuppressWarnings("all")
+    private final Map<String, Long> cooldowns = new HashMap<>();
+
+    /**
+     * @param emoteName           The name of the emote.
+     * @param cooldown            The cooldown between each of the emotes.
+     * @param executorMessage     The message that the executor will receive upon doing the emote.
+     * @param receiverMessage     The message that the receiving player will get.
+     * @param requiredPermissions The permissions required to do this emote.
+     * @param easterEggs          The easter egg messages. When an emote is used on an entity that is in this list.
+     */
+    public Emote(String emoteName, long cooldown, String executorMessage, String receiverMessage, Collection<Permission> requiredPermissions, Map<String, MessagePair> easterEggs) {
+        this.emoteName = emoteName;
+        this.cooldown = cooldown;
+        this.executorMessage = executorMessage;
+        this.receiverMessage = receiverMessage;
+        this.requiredPermissions = requiredPermissions;
+        this.easterEggs = easterEggs;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public IEmoteResult execute(final Player executor, final Entity receiver) {
+    public IEmoteResult execute(final Player executor, final EmoteReceiver receiver) {
         //First we'll check the cooldown since that is the easiest one to check in terms of
         //operation time.
-        if (getCooldowns().getOrDefault(executor.getUniqueId().toString(), System.currentTimeMillis()) + getCooldown() > System.currentTimeMillis()) {
-            return new EmoteResult(emoteMessageProvider -> executor.sendMessage(emoteMessageProvider.getCooldownMessage()));
+        final long nextUse = getCooldowns().getOrDefault(executor.getUniqueId().toString(), System.currentTimeMillis());
+        if (nextUse > System.currentTimeMillis()) {
+            return new EmoteResult(emoteMessageProvider -> executor.sendMessage(emoteMessageProvider.getCooldownMessage().replace("%s", Integer.toString(Math.round((nextUse - System.currentTimeMillis()) / 1000)))));
         }
 
         //After we check the permissions.
@@ -81,9 +105,78 @@ public class Emote implements IEmote {
         });
 
         return new EmoteResult(emotePlugin -> {
-            cooldowns.put(executor.getUniqueId().toString(), System.currentTimeMillis());
-            Optional.ofNullable(messagePair.getExecutorMessage()).ifPresent(executor::sendMessage);
-            Optional.ofNullable(messagePair.getReceiverMessage()).ifPresent(receiver::sendMessage);
+            cooldowns.put(executor.getUniqueId().toString(), System.currentTimeMillis() + getCooldown());
+            Optional.ofNullable(messagePair.getExecutorMessage()).ifPresent(s -> executor.sendMessage(s.replace("%r", receiver.getName())));
+            Optional.ofNullable(messagePair.getReceiverMessage()).ifPresent(s -> receiver.sendMessage(s.replace("%e", executor.getName())));
         });
+    }
+
+    /**
+     * Deserializes the object with Bukkit.
+     *
+     * @param args The arguments given.
+     * @return The new object.
+     */
+    @SuppressWarnings("unchecked")
+    public static Emote deserialize(Map<String, Object> args) throws Exception {
+        String emoteName;
+        long cooldown;
+        String executorMessage;
+        String receiverMessage;
+        Collection<Permission> requiredPermissions;
+        Map<String, MessagePair> easterEggs;
+
+        if(args.containsKey("name")) {
+            emoteName = (String)args.get("name");
+        } else {
+            throw new Exception("Could not deserialize Emote, missing name.");
+        }
+
+        if(args.containsKey("cooldown")) {
+            cooldown = (Integer)args.get("cooldown");
+        } else {
+            cooldown = 0;
+        }
+
+        if(args.containsKey("executor_message")) {
+            executorMessage = (String) args.get("executor_message");
+        } else {
+            throw new Exception("Could not deserialize Emote, missing executor message.");
+        }
+
+        if(args.containsKey("receiver_message")) {
+            receiverMessage = (String) args.get("receiver_message");
+        } else {
+            throw new Exception("Could not deserialize Emote, missing receiver message.");
+        }
+
+        if(args.containsKey("required_permissions")) {
+            requiredPermissions = (Collection<Permission>) args.get("required_permissions");
+        } else {
+            requiredPermissions = new ArrayList<>();
+        }
+
+        if(args.containsKey("easter_eggs")) {
+            easterEggs = (Map<String, MessagePair>) args.get("easter_eggs");
+        } else {
+            easterEggs = new HashMap<>();
+        }
+        return new Emote(emoteName, cooldown, executorMessage, receiverMessage, requiredPermissions, easterEggs);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "Emote{" +
+                "emoteName='" + emoteName + '\'' +
+                ", cooldown=" + cooldown +
+                ", executorMessage='" + executorMessage + '\'' +
+                ", receiverMessage='" + receiverMessage + '\'' +
+                ", requiredPermissions=" + requiredPermissions +
+                ", easterEggs=" + easterEggs +
+                ", cooldowns=" + cooldowns +
+                '}';
     }
 }
