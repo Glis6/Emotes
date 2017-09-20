@@ -24,3 +24,8 @@
 hs_err_pid*
 
 /.idea/
+src/test/
+target/classes/plugin.yml
+target/generated-sources/
+target/maven-archiver/
+target/maven-status/

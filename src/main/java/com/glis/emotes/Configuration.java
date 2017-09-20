@@ -50,7 +50,7 @@ public class Configuration {
         javaPlugin.getConfig().addDefault("message.cooldown_message", DEFAULT_COOLDOWN_MESSAGE);
         final List<Emote> emotes = new ArrayList<>();
         final Map<String, MessagePair> easterEggs = new HashMap<>();
-        easterEggs.put("cactus", new SimpleMessagePair("This strings!", ""));
+        easterEggs.put("cactus", new SimpleMessagePair("This stings!", ""));
         emotes.add(new Emote("hug", 8000, "You give a hug to %r.", "%e approaches you and hugs you!", new ArrayList<>(), easterEggs));
         javaPlugin.getConfig().addDefault("emotes", emotes);
     }
