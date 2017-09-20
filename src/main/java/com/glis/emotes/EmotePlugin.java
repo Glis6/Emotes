@@ -5,12 +5,20 @@ import org.bukkit.plugin.java.JavaPlugin;
 /**
  * @author Glis
  */
-public class EmotePlugin extends JavaPlugin {
-    protected String getInsufficientPermissionsMessage() {
+public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getInsufficientPermissionsMessage() {
         return ""; //TODO CONFIG FILE
     }
 
-    protected String getCooldownMessage() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCooldownMessage() {
         return ""; //TODO CONFIG FILE
     }
 }

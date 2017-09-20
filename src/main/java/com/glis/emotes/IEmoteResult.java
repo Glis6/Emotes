@@ -9,5 +9,5 @@ public interface IEmoteResult {
     /**
      * @return The result from executing the emote.
      */
-    Consumer<EmotePlugin> result();
+    Consumer<EmoteMessageProvider> result();
 }

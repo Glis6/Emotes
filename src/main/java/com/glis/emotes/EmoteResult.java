@@ -12,13 +12,13 @@ public class EmoteResult implements IEmoteResult {
     /**
      * The result from executing the plugin.
      */
-    private final Consumer<EmotePlugin> result;
+    private final Consumer<EmoteMessageProvider> result;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Consumer<EmotePlugin> result() {
+    public Consumer<EmoteMessageProvider> result() {
         return result;
     }
 }

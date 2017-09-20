@@ -62,12 +62,12 @@ public class Emote implements IEmote {
         //First we'll check the cooldown since that is the easiest one to check in terms of
         //operation time.
         if (getCooldowns().getOrDefault(executor.getUniqueId().toString(), System.currentTimeMillis()) + getCooldown() > System.currentTimeMillis()) {
-            return new EmoteResult(emotePlugin -> executor.sendMessage(emotePlugin.getCooldownMessage()));
+            return new EmoteResult(emoteMessageProvider -> executor.sendMessage(emoteMessageProvider.getCooldownMessage()));
         }
 
         //After we check the permissions.
         if (!getRequiredPermissions().stream().allMatch(executor::hasPermission)) {
-            return new EmoteResult(emotePlugin -> executor.sendMessage(emotePlugin.getInsufficientPermissionsMessage()));
+            return new EmoteResult(emoteMessageProvider -> executor.sendMessage(emoteMessageProvider.getInsufficientPermissionsMessage()));
         }
 
         //We define the default message that will be received.
