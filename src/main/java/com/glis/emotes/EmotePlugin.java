@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * @author Glis
@@ -39,13 +40,13 @@ public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
     public void onEnable() {
         configuration.loadConfiguration();
         emotes.clear();
-        emotes.addAll((Collection<Emote>)getConfig().get("emotes"));
+        Optional.ofNullable(getConfig().get("emotes")).ifPresent(o -> emotes.addAll((Collection<Emote>)o));
 
         try{
             Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
             CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-            emotes.forEach(iEmote -> commandMap.register(iEmote.getEmoteName(), new EmoteCommand(iEmote, this)));
+            emotes.forEach(emote -> commandMap.register(emote.getEmoteName(), new EmoteCommand(emote, this)));
         } catch (Exception e){
             e.printStackTrace();
         }
