@@ -1,7 +1,10 @@
-package com.glis.emotes;
+package com.github.glis6.emotes;
 
+import com.github.glis6.emotes.particles.movement.CircleMovement;
+import com.github.glis6.emotes.particles.movement.HelixMovement;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,12 +23,19 @@ public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
     static {
         ConfigurationSerialization.registerClass(Emote.class, "Emote");
         ConfigurationSerialization.registerClass(SimpleMessagePair.class, "SimpleMessagePair");
+        ConfigurationSerialization.registerClass(HelixMovement.class, "HelixMovement");
+        ConfigurationSerialization.registerClass(CircleMovement.class, "CircleMovement");
     }
 
     /**
-     * The {@link Configuration} to be used by the plugin.
+     * The {@link FileConfiguration} used to store/load the messages.
      */
-    private final Configuration configuration = new Configuration(this);
+    private final FileConfiguration messagesConfiguration;
+
+    /**
+     * The {@link FileConfiguration} used to store/load the emotes.
+     */
+    private final FileConfiguration emotesConfiguration;
 
     /**
      * The emotes currently loaded for the plugin.
@@ -38,9 +48,9 @@ public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
     @Override
     @SuppressWarnings("all")
     public void onEnable() {
-        configuration.loadConfiguration();
+        //TODO LOAD CONFIG
         emotes.clear();
-        Optional.ofNullable(getConfig().get("emotes")).ifPresent(o -> emotes.addAll((Collection<Emote>)o));
+        Optional.ofNullable(emotesConfiguration.get("emotes")).ifPresent(o -> emotes.addAll((Collection<Emote>)o));
 
         try{
             Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
@@ -57,7 +67,7 @@ public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
      */
     @Override
     public String getInsufficientPermissionsMessage() {
-        return getConfig().getString("message.insufficient_permission_message");
+        return messagesConfiguration.getString("messages.insufficient_permission_message");
     }
 
     /**
@@ -65,6 +75,14 @@ public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
      */
     @Override
     public String getCooldownMessage() {
-        return getConfig().getString("message.cooldown_message");
+        return messagesConfiguration.getString("messages.cooldown_message");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getNoTargetMessage() {
+        return messagesConfiguration.getString("messages.no_target_message");
     }
 }

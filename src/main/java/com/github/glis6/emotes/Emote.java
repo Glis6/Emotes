@@ -1,6 +1,8 @@
-package com.glis.emotes;
+package com.github.glis6.emotes;
 
+import com.github.glis6.emotes.particles.ParticleMovement;
 import lombok.Getter;
+import org.apache.commons.lang.SerializationException;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -41,6 +43,12 @@ public class Emote implements IEmote {
     private final String receiverMessage;
 
     /**
+     * The {@link ParticleMovement} for this emote. This can be null.
+     */
+    @Getter
+    private final ParticleMovement particleMovement;
+
+    /**
      * The permissions required to do this emote.
      */
     @Getter
@@ -65,14 +73,16 @@ public class Emote implements IEmote {
      * @param cooldown            The cooldown between each of the emotes.
      * @param executorMessage     The message that the executor will receive upon doing the emote.
      * @param receiverMessage     The message that the receiving player will get.
+     * @param particleMovement    The {@link ParticleMovement} for this emote. This can be null.
      * @param requiredPermissions The permissions required to do this emote.
      * @param easterEggs          The easter egg messages. When an emote is used on an entity that is in this list.
      */
-    public Emote(String emoteName, long cooldown, String executorMessage, String receiverMessage, Collection<Permission> requiredPermissions, Map<String, MessagePair> easterEggs) {
+    public Emote(String emoteName, long cooldown, String executorMessage, String receiverMessage, ParticleMovement particleMovement, Collection<Permission> requiredPermissions, Map<String, MessagePair> easterEggs) {
         this.emoteName = emoteName;
         this.cooldown = cooldown;
         this.executorMessage = executorMessage;
         this.receiverMessage = receiverMessage;
+        this.particleMovement = particleMovement;
         this.requiredPermissions = requiredPermissions;
         this.easterEggs = easterEggs;
     }
@@ -82,7 +92,11 @@ public class Emote implements IEmote {
      */
     @Override
     public IEmoteResult execute(final Player executor, final EmoteReceiver receiver) {
-        //First we'll check the cooldown since that is the easiest one to check in terms of
+        //First we'll check if we're actually hugging something.
+        if(receiver.getName().equalsIgnoreCase("air")) {
+            return new EmoteResult(emoteMessageProvider -> executor.sendMessage(emoteMessageProvider.getNoTargetMessage()));
+        }
+        //We'll check the cooldown since that is the easiest one to check in terms of
         //operation time.
         final long nextUse = getCooldowns().getOrDefault(executor.getUniqueId().toString(), System.currentTimeMillis());
         if (nextUse > System.currentTimeMillis()) {
@@ -108,6 +122,7 @@ public class Emote implements IEmote {
             cooldowns.put(executor.getUniqueId().toString(), System.currentTimeMillis() + getCooldown());
             Optional.ofNullable(messagePair.getExecutorMessage()).ifPresent(s -> executor.sendMessage(s.replace("%r", receiver.getName())));
             Optional.ofNullable(messagePair.getReceiverMessage()).ifPresent(s -> receiver.sendMessage(s.replace("%e", executor.getName())));
+            Optional.ofNullable(particleMovement).ifPresent(consumer -> consumer.applyParticles(() -> particleData -> executor.spawnParticle(particleData.getParticle(), executor.getLocation(), 1, particleData.getX(), particleData.getY(), particleData.getZ()), receiver));
         });
     }
 
@@ -118,50 +133,57 @@ public class Emote implements IEmote {
      * @return The new object.
      */
     @SuppressWarnings("unchecked")
-    public static Emote deserialize(Map<String, Object> args) throws Exception {
+    public static Emote deserialize(Map<String, Object> args) throws SerializationException {
         String emoteName;
         long cooldown;
         String executorMessage;
         String receiverMessage;
+        ParticleMovement particleMovement;
         Collection<Permission> requiredPermissions;
         Map<String, MessagePair> easterEggs;
 
-        if(args.containsKey("name")) {
-            emoteName = (String)args.get("name");
+        if (args.containsKey("name")) {
+            emoteName = (String) args.get("name");
         } else {
-            throw new Exception("Could not deserialize Emote, missing name.");
+            throw new SerializationException("Could not deserialize Emote, missing name.");
         }
 
-        if(args.containsKey("cooldown")) {
-            cooldown = (Integer)args.get("cooldown");
+        if (args.containsKey("cooldown")) {
+            cooldown = (Integer) args.get("cooldown");
         } else {
             cooldown = 0;
         }
 
-        if(args.containsKey("executor_message")) {
+        if (args.containsKey("executor_message")) {
             executorMessage = (String) args.get("executor_message");
         } else {
-            throw new Exception("Could not deserialize Emote, missing executor message.");
+            throw new SerializationException("Could not deserialize Emote, missing executor message.");
         }
 
-        if(args.containsKey("receiver_message")) {
+        if (args.containsKey("receiver_message")) {
             receiverMessage = (String) args.get("receiver_message");
         } else {
-            throw new Exception("Could not deserialize Emote, missing receiver message.");
+            throw new SerializationException("Could not deserialize Emote, missing receiver message.");
         }
 
-        if(args.containsKey("required_permissions")) {
+        if (args.containsKey("particle")) {
+            particleMovement = (ParticleMovement) args.get("particle");
+        } else {
+            particleMovement = null;
+        }
+
+        if (args.containsKey("required_permissions")) {
             requiredPermissions = (Collection<Permission>) args.get("required_permissions");
         } else {
             requiredPermissions = new ArrayList<>();
         }
 
-        if(args.containsKey("easter_eggs")) {
+        if (args.containsKey("easter_eggs")) {
             easterEggs = (Map<String, MessagePair>) args.get("easter_eggs");
         } else {
             easterEggs = new HashMap<>();
         }
-        return new Emote(emoteName, cooldown, executorMessage, receiverMessage, requiredPermissions, easterEggs);
+        return new Emote(emoteName, cooldown, executorMessage, receiverMessage, particleMovement, requiredPermissions, easterEggs);
     }
 
     /**
@@ -174,6 +196,7 @@ public class Emote implements IEmote {
                 ", cooldown=" + cooldown +
                 ", executorMessage='" + executorMessage + '\'' +
                 ", receiverMessage='" + receiverMessage + '\'' +
+                ", particleMovement=" + particleMovement +
                 ", requiredPermissions=" + requiredPermissions +
                 ", easterEggs=" + easterEggs +
                 ", cooldowns=" + cooldowns +

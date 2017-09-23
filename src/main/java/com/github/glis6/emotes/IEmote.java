@@ -1,5 +1,6 @@
-package com.glis.emotes;
+package com.github.glis6.emotes;
 
+import com.github.glis6.emotes.particles.ParticleMovement;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -57,12 +58,18 @@ public interface IEmote extends ConfigurationSerializable {
     String getReceiverMessage();
 
     /**
+     * The {@link ParticleMovement} for this emote. This can be null.
+     */
+    ParticleMovement getParticleMovement();
+
+    /**
      * {@inheritDoc}
      */
     default Map<String, Object> serialize() {
         final Map<String, Object> result = new HashMap<>();
         result.put("name", getEmoteName());
         result.put("cooldown", getCooldown());
+        result.put("particle", getParticleMovement());
         result.put("executor_message", getExecutorMessage());
         result.put("receiver_message", getReceiverMessage());
         result.put("required_permissions", getRequiredPermissions());

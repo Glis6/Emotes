@@ -1,8 +1,10 @@
-package com.glis.emotes;
+package com.github.glis6.emotes;
 
+import org.bukkit.EntityEffect;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -41,12 +43,22 @@ public final class EmoteCommand extends Command {
         EmoteReceiver emoteReceiver = null;
 
         for (Entity e : player.getNearbyEntities(3, 3, 3)) {
-            if (e != null && e != player && player.hasLineOfSight(e)) {
-                emoteReceiver = new EmoteReceiver(e.getName(), e::sendMessage);
+            if (e != null && !(e instanceof Item) && e != player && player.hasLineOfSight(e)) {
+                emoteReceiver = new EmoteReceiver(e.getName(), e::sendMessage, particleData -> {
+                    if (e instanceof Player) {
+                        ((Player) e).spawnParticle(particleData.getParticle(), e.getLocation(), 1, particleData.getX(), particleData.getY(), particleData.getZ());
+                    } else {
+                        try {
+                            e.playEffect(EntityEffect.valueOf(particleData.getParticle().name()));
+                        } catch (IllegalArgumentException ignored) {
+                            //Ignoring the exception as it is controlled.
+                        }
+                    }
+                });
             }
         }
         if (emoteReceiver == null) {
-            emoteReceiver = new EmoteReceiver(player.getTargetBlock(null, 3).getType().name().replace("_", " ").toLowerCase(), s1 -> { /*Do nothing*/ });
+            emoteReceiver = new EmoteReceiver(player.getTargetBlock(null, 3).getType().name().replace("_", " ").toLowerCase(), s1 -> { /*Do nothing*/ }, particleData -> { /* Do nothing */});
         }
 
         emote.execute(player, emoteReceiver)

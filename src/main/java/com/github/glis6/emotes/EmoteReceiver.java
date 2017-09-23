@@ -1,5 +1,7 @@
-package com.glis.emotes;
+package com.github.glis6.emotes;
 
+import com.github.glis6.emotes.particles.ParticleReceiver;
+import com.github.glis6.emotes.particles.ParticleData;
 import lombok.Getter;
 
 import java.util.function.Consumer;
@@ -7,7 +9,7 @@ import java.util.function.Consumer;
 /**
  * @author Glis
  */
-public class EmoteReceiver {
+public class EmoteReceiver implements ParticleReceiver {
     /**
      * The name of the {@link EmoteReceiver}.
      */
@@ -21,12 +23,19 @@ public class EmoteReceiver {
     private final Consumer<String> messageSender;
 
     /**
+     * The {@link Consumer} to display the particles.
+     */
+    @Getter
+    private final Consumer<ParticleData> particleConsumer;
+
+    /**
      * @param name The name of the {@link EmoteReceiver}.
      * @param messageSender The {@link Consumer} to send the message.
      */
-    public EmoteReceiver(String name, Consumer<String> messageSender) {
+    public EmoteReceiver(String name, Consumer<String> messageSender, Consumer<ParticleData> particleConsumer) {
         this.name = name;
         this.messageSender = messageSender;
+        this.particleConsumer = particleConsumer;
     }
 
     /**

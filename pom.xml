@@ -6,9 +6,9 @@
 
     <packaging>jar</packaging>
 
-    <groupId>Glis</groupId>
-    <artifactId>Emotes</artifactId>
-    <version>1.0-RELEASE</version>
+    <groupId>com.github.glis6</groupId>
+    <artifactId>minecraft-emotes</artifactId>
+    <version>1.0-DEVELOPMENT</version>
 
     <properties>
         <jdk.version>1.8</jdk.version>
@@ -33,6 +33,10 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
     <dependencies>
         <!--Spigot API-->
@@ -55,6 +59,12 @@
             <artifactId>lombok</artifactId>
             <version>1.16.18</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.Glis6</groupId>
+            <artifactId>Core</artifactId>
+            <version>0.1</version>
         </dependency>
     </dependencies>
 </project>

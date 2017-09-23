@@ -1,4 +1,4 @@
-package com.glis.emotes;
+package com.github.glis6.emotes;
 
 import lombok.Getter;
 import lombok.Setter;
