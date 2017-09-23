@@ -1,5 +1,5 @@
 name: EmotesPlugin
 version: 1.0.0
-main: EmotePlugin
+main: com.github.glis6.emotes.EmotePlugin
 description: This plugin adds custom emote commands to the server.
 author: Glis

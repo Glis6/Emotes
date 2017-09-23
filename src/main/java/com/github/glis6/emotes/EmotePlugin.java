@@ -1,5 +1,7 @@
 package com.github.glis6.emotes;
 
+import com.github.glis6.emotes.config.EmotesConfigurationLoader;
+import com.github.glis6.emotes.config.MessageConfigurationLoader;
 import com.github.glis6.emotes.particles.movement.CircleMovement;
 import com.github.glis6.emotes.particles.movement.HelixMovement;
 import org.bukkit.Bukkit;
@@ -12,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * @author Glis
@@ -30,12 +33,7 @@ public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
     /**
      * The {@link FileConfiguration} used to store/load the messages.
      */
-    private final FileConfiguration messagesConfiguration;
-
-    /**
-     * The {@link FileConfiguration} used to store/load the emotes.
-     */
-    private final FileConfiguration emotesConfiguration;
+    private FileConfiguration messagesConfiguration;
 
     /**
      * The emotes currently loaded for the plugin.
@@ -48,7 +46,14 @@ public class EmotePlugin extends JavaPlugin implements EmoteMessageProvider {
     @Override
     @SuppressWarnings("all")
     public void onEnable() {
-        //TODO LOAD CONFIG
+        FileConfiguration emotesConfiguration;
+        try {
+            messagesConfiguration = new MessageConfigurationLoader(this).loadConfiguration();
+            emotesConfiguration = new EmotesConfigurationLoader(this).loadConfiguration();
+        } catch(Exception e) {
+            getLogger().log(Level.SEVERE, "Something went wrong loading configurations. Not loading plugin.", e);
+            return;
+        }
         emotes.clear();
         Optional.ofNullable(emotesConfiguration.get("emotes")).ifPresent(o -> emotes.addAll((Collection<Emote>)o));
 

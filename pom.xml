@@ -33,11 +33,8 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
     </repositories>
+
     <dependencies>
         <!--Spigot API-->
         <dependency>
@@ -59,12 +56,6 @@
             <artifactId>lombok</artifactId>
             <version>1.16.18</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.Glis6</groupId>
-            <artifactId>Core</artifactId>
-            <version>0.1</version>
         </dependency>
     </dependencies>
 </project>

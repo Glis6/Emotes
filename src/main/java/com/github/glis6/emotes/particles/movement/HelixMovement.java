@@ -1,12 +1,12 @@
 package com.github.glis6.emotes.particles.movement;
 
-import com.github.glis.emotes.particles.*;
 import com.github.glis6.emotes.particles.*;
-import com.glis.minecraft.emotes.particles.*;
 import org.apache.commons.lang.SerializationException;
 import org.bukkit.Particle;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
