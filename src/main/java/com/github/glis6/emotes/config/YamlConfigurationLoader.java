@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * @author Glis
  */
-public abstract class YamlConfigurationLoader implements Configuration<YamlConfiguration> {
+public abstract class YamlConfigurationLoader implements ConfigurationLoader<YamlConfiguration> {
     /**
      * The name of the file we are loading.
      */
