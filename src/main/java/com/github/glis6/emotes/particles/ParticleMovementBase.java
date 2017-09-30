@@ -35,7 +35,7 @@ public abstract class ParticleMovementBase implements ParticleMovement {
     protected Particle getRandomParticle() {
         if (getParticles().length == 1)
             return getParticles()[0];
-        return getParticles()[RANDOM.nextInt(getParticles().length - 1)];
+        return getParticles()[RANDOM.nextInt(getParticles().length)];
     }
 
     /**

@@ -34,7 +34,7 @@ public final class EmotesConfigurationLoader extends YamlConfigurationLoader {
     protected void createDefaults() {
         final List<Emote> emotes = new ArrayList<>();
         final Map<String, MessagePair> easterEggs = new HashMap<>();
-        final ParticleMovement particleMovement = new CircleMovement(Collections.singletonList(Particle.HEART), ParticleReceiverType.BOTH, 50);
+        final ParticleMovement particleMovement = new CircleMovement(Collections.singletonList(Particle.HEART), ParticleReceiverType.BOTH, 50, 0.4);
         easterEggs.put("cactus", new SimpleMessagePair("This stings!", ""));
         emotes.add(new Emote("hug", 8000, "You give a hug to %r.", "%e approaches you and hugs you!", particleMovement, new ArrayList<>(), easterEggs));
         getYamlConfiguration().addDefault("emotes", emotes);

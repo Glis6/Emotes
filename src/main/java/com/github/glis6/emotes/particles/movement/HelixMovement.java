@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
  * @author Glis
  */
 public final class HelixMovement extends DefinedReceiverBase {
-
     /**
      * The radius to apply the particles around.
      */
@@ -36,10 +35,11 @@ public final class HelixMovement extends DefinedReceiverBase {
     @Override
     public void applyParticles(ParticleReceiver executor, ParticleReceiver receiver) {
         final Consumer<ParticleData> particleConsumer = getParticleReceiverType().getParticleConsumer(executor, receiver);
-        for (double y = 0; y <= 50; y += 0.05) {
-            double x = radius * Math.cos(y);
-            double z = radius * Math.sin(y);
-            particleConsumer.accept(new ParticleData(getRandomParticle(), x, y, z));
+        for(int i = 1; i <= 20; i++) {
+            double a = ((2 * Math.PI) / 20) * i;
+            double x = Math.cos(a) * 0.5;
+            double z = Math.sin(a) * 0.5;
+            particleConsumer.accept(new ParticleData(getRandomParticle(), x, 2, z));
         }
     }
 

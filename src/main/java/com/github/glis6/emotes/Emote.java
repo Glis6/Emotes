@@ -122,7 +122,12 @@ public class Emote implements IEmote {
             cooldowns.put(executor.getUniqueId().toString(), System.currentTimeMillis() + getCooldown());
             Optional.ofNullable(messagePair.getExecutorMessage()).ifPresent(s -> executor.sendMessage(s.replace("%r", receiver.getName())));
             Optional.ofNullable(messagePair.getReceiverMessage()).ifPresent(s -> receiver.sendMessage(s.replace("%e", executor.getName())));
-            Optional.ofNullable(particleMovement).ifPresent(consumer -> consumer.applyParticles(() -> particleData -> executor.spawnParticle(particleData.getParticle(), executor.getLocation(), 1, particleData.getX(), particleData.getY(), particleData.getZ()), receiver));
+            Optional.ofNullable(particleMovement).ifPresent(consumer -> consumer.applyParticles(() -> particleData -> {
+                double x = executor.getLocation().getX() + particleData.getX();
+                double y = executor.getLocation().getY() + particleData.getY();
+                double z = executor.getLocation().getZ() + particleData.getZ();
+                executor.spawnParticle(particleData.getParticle(), x, y, z, 1);
+            }, receiver));
         });
     }
 

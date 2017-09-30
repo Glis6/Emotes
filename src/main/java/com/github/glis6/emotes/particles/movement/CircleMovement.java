@@ -1,8 +1,11 @@
 package com.github.glis6.emotes.particles.movement;
 
-import com.github.glis6.emotes.particles.*;
-import org.apache.commons.lang.SerializationException;
+import com.github.glis6.emotes.particles.ParticleData;
+import com.github.glis6.emotes.particles.ParticleMovement;
+import com.github.glis6.emotes.particles.ParticleReceiver;
+import com.github.glis6.emotes.particles.ParticleReceiverType;
 import org.bukkit.Particle;
+import org.apache.commons.lang.SerializationException;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,20 +16,15 @@ import java.util.stream.Collectors;
 /**
  * @author Glis
  */
-public final class CircleMovement extends DefinedReceiverBase {
-    /**
-     * The amount of particles in the circle.
-     */
-    private final int particleCount;
-
+public class CircleMovement extends CircularMovement {
     /**
      * @param particles            A {@link Collection} of {@link Particle}s to use.
      * @param particleReceiverType A modifier to see who receives the final particle.
      * @param particleCount        The amount of particles in the circle.
+     * @param radius               The radius of the circle.
      */
-    public CircleMovement(Collection<Particle> particles, ParticleReceiverType particleReceiverType, int particleCount) {
-        super(particles, particleReceiverType);
-        this.particleCount = particleCount;
+    public CircleMovement(Collection<Particle> particles, ParticleReceiverType particleReceiverType, int particleCount, double radius) {
+        super(particles, particleReceiverType, particleCount, radius);
     }
 
     /**
@@ -35,23 +33,12 @@ public final class CircleMovement extends DefinedReceiverBase {
     @Override
     public void applyParticles(ParticleReceiver executor, ParticleReceiver receiver) {
         final Consumer<ParticleData> particleConsumer = getParticleReceiverType().getParticleConsumer(executor, receiver);
-        for(int i = 0; i < particleCount; i++) {
-            double a = 2 * Math.PI / particleCount * i;
-            double x = Math.cos(a) * 1;
-            double z = Math.sin(a) * 1;
-            particleConsumer.accept(new ParticleData(getRandomParticle(), x, 0.5, z));
+        for(int i = 1; i <= getParticleCount(); i++) {
+            double a = ((2 * Math.PI) / getParticleCount()) * i;
+            double x = Math.cos(a) * getRadius();
+            double z = Math.sin(a) * getRadius();
+            particleConsumer.accept(new ParticleData(getRandomParticle(), x, 2, z));
         }
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> serialize() {
-        final Map<String, Object> result = super.serialize();
-        result.put("particle_count", particleCount);
-        return result;
     }
 
     /**
@@ -63,6 +50,7 @@ public final class CircleMovement extends DefinedReceiverBase {
     @SuppressWarnings("unchecked")
     public static ParticleMovement deserialize(Map<String, Object> args) throws SerializationException {
         int particleCount;
+        double radius;
         Collection<Particle> particles;
         ParticleReceiverType particleReceiverType;
 
@@ -70,6 +58,12 @@ public final class CircleMovement extends DefinedReceiverBase {
             particleCount = (Integer) args.get("particle_count");
         } else {
             particleCount = 20;
+        }
+
+        if (args.containsKey("radius")) {
+            radius = (Double) args.get("radius");
+        } else {
+            radius = 0.5;
         }
 
         if (args.containsKey("types")) {
@@ -89,6 +83,6 @@ public final class CircleMovement extends DefinedReceiverBase {
             particleReceiverType = ParticleReceiverType.EXECUTOR;
         }
 
-        return new CircleMovement(particles, particleReceiverType, particleCount);
+        return new CircleMovement(particles, particleReceiverType, particleCount, radius);
     }
 }

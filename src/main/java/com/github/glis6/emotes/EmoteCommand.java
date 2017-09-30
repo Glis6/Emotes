@@ -1,6 +1,5 @@
 package com.github.glis6.emotes;
 
-import org.bukkit.EntityEffect;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -45,15 +44,10 @@ public final class EmoteCommand extends Command {
         for (Entity e : player.getNearbyEntities(3, 3, 3)) {
             if (e != null && !(e instanceof Item) && e != player && player.hasLineOfSight(e)) {
                 emoteReceiver = new EmoteReceiver(e.getName(), e::sendMessage, particleData -> {
-                    if (e instanceof Player) {
-                        ((Player) e).spawnParticle(particleData.getParticle(), e.getLocation(), 1, particleData.getX(), particleData.getY(), particleData.getZ());
-                    } else {
-                        try {
-                            e.playEffect(EntityEffect.valueOf(particleData.getParticle().name()));
-                        } catch (IllegalArgumentException ignored) {
-                            //Ignoring the exception as it is controlled.
-                        }
-                    }
+                    double x = e.getLocation().getX() + particleData.getX();
+                    double y = e.getLocation().getY() + particleData.getY();
+                    double z = e.getLocation().getZ() + particleData.getZ();
+                    e.getWorld().spawnParticle(particleData.getParticle(), x, y, z, 1);
                 });
             }
         }
